@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Migración del Módulo de Notificaciones a Microservicios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#005F73] mb-2">Migración del Módulo de Notificaciones</h1>
+            <p class="text-lg md:text-xl text-[#0A9396]">De una Arquitectura Monolítica a Microservicios</p>
+        </header>
+
+        <main>
+            <section id="current-state" class="mb-16">
+                <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-[#005F73] mb-4 text-center">Panorama Actual: Un Módulo Monolítico</h2>
+                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8">
+                        El módulo de notificaciones actual, aunque funcional, centraliza una gran cantidad de responsabilidades en varios controladores estrechamente acoplados. Esta estructura presenta desafíos para la escalabilidad y el mantenimiento a largo plazo.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="bg-white rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-[#0A9396] mb-4 text-center">Flujo de Responsabilidades del Controlador</h3>
+                            <p class="text-sm text-gray-500 text-center mb-4">Visualización del flujo de control y dependencias entre los componentes clave del módulo de notificaciones existente.</p>
+                            <div class="space-y-4">
+                                <div class="text-center p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
+                                    <p class="font-semibold text-blue-800">Módulo Central Laravel</p>
+                                    <p class="text-xs text-blue-600">(Clases, Canales, Envío)</p>
+                                </div>
+                                <div class="flex justify-center">
+                                    <span class="text-2xl text-blue-400">↓</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg text-center">
+                                        <p class="font-semibold text-teal-800">NotificacionTipo</p><p class="text-xs text-teal-600">(CRUD de Tipos)</p>
+                                    </div>
+                                    <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg text-center">
+                                        <p class="font-semibold text-teal-800">NotificacionAutomatica</p><p class="text-xs text-teal-600">(Gestión de Triggers)</p>
+                                    </div>
+                                    <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg text-center">
+                                        <p class="font-semibold text-teal-800">NotificacionTipoUsuario</p><p class="text-xs text-teal-600">(Asociaciones)</p>
+                                    </div>
+                                    <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg text-center">
+                                        <p class="font-semibold text-teal-800">NotificationPush</p><p class="text-xs text-teal-600">(Envío Push)</p>
+                                    </div>
+                                </div>
+                                <div class="flex justify-center">
+                                    <span class="text-2xl text-blue-400">↓</span>
+                                </div>
+                                <div class="text-center p-3 bg-orange-50 border border-orange-200 rounded-lg shadow-sm">
+                                    <p class="font-semibold text-orange-800">NotificacionUsuario</p>
+                                    <p class="text-xs text-orange-600">(Gestión, Lectura, Admin)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="controllerResponsibilitiesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="migration-plan" class="mb-16">
+                <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-[#005F73] mb-4 text-center">El Plan de Migración: Arquitectura de Microservicios</h2>
+                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">
+                        La estrategia es desacoplar las funcionalidades en servicios independientes y especializados. Cada microservicio gestionará su propio dominio, base de datos y lógica de negocio, comunicándose a través de una API Gateway centralizada.
+                    </p>
+                    <div class="w-full p-6 bg-gray-50 rounded-lg">
+                        <h3 class="text-xl font-semibold text-[#0A9396] mb-6 text-center">Diagrama de la Nueva Arquitectura</h3>
+                        <div class="flex flex-col items-center">
+                            <div class="p-4 bg-purple-100 border border-purple-300 rounded-lg text-center mb-4">
+                                <p class="font-bold text-purple-800">API Gateway</p>
+                                <p class="text-xs text-purple-600">(Punto de Entrada Único y Seguro)</p>
+                            </div>
+                            <div class="w-px h-8 bg-purple-300"></div>
+                            <div class="flex justify-center space-x-8 mb-4">
+                                <div class="w-8 h-px bg-purple-300"></div>
+                                <div class="w-8 h-px bg-purple-300"></div>
+                                <div class="w-8 h-px bg-purple-300"></div>
+                                <div class="w-8 h-px bg-purple-300"></div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center w-full max-w-4xl">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-px h-8 bg-purple-300"></div>
+                                    <div class="p-3 bg-green-50 border border-green-300 rounded-lg w-full">
+                                        <p class="font-semibold text-green-800">Servicio de Tipos</p><p class="text-xs text-green-600">(CRUD)</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="w-px h-8 bg-purple-300"></div>
+                                    <div class="p-3 bg-green-50 border border-green-300 rounded-lg w-full">
+                                        <p class="font-semibold text-green-800">Servicio de Archivos</p><p class="text-xs text-green-600">(Imágenes)</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="w-px h-8 bg-purple-300"></div>
+                                    <div class="p-3 bg-yellow-50 border border-yellow-300 rounded-lg w-full">
+                                        <p class="font-semibold text-yellow-800">Servicio Core</p><p class="text-xs text-yellow-600">(Envío y Gestión)</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="w-px h-8 bg-purple-300"></div>
+                                    <div class="p-3 bg-red-50 border border-red-300 rounded-lg w-full">
+                                        <p class="font-semibold text-red-800">Servicio Push</p><p class="text-xs text-red-600">(Dispositivos)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="timeline" class="mb-16">
+                <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-[#005F73] mb-4 text-center">Estimación del Esfuerzo y Cronograma</h2>
+                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8">
+                        La migración completa del módulo se estima en 2 a 3 meses. Este cronograma incluye fases de diseño, desarrollo paralelo de los microservicios, y una fase final de integración y pruebas exhaustivas para asegurar la estabilidad del sistema.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#0A9396] mb-4 text-center">Desglose del Proyecto Completo</h3>
+                            <div class="chart-container" style="height: 350px; max-height: 40vh;">
+                                <canvas id="projectTimelineChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#0A9396] mb-4 text-center">Caso de Estudio: Migración de `NotificacionTipoController`</h3>
+                            <p class="text-sm text-center text-gray-500 mb-6">La migración de un solo componente se estima en 1 a 2 semanas, sirviendo como piloto para el resto del proyecto.</p>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <div class="w-1/3 text-sm font-semibold pr-2 text-right">Diseño y Plan</div>
+                                    <div class="w-2/3 bg-gray-200 rounded-full h-6">
+                                        <div class="bg-[#94D2BD] h-6 rounded-full text-xs text-center text-black font-bold flex items-center justify-center" style="width: 20%">1 día</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-1/3 text-sm font-semibold pr-2 text-right">Implementación</div>
+                                    <div class="w-2/3 bg-gray-200 rounded-full h-6">
+                                        <div class="bg-[#E9D8A6] h-6 rounded-full text-xs text-center text-black font-bold flex items-center justify-center" style="width: 50%">2-3 días</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-1/3 text-sm font-semibold pr-2 text-right">Autenticación</div>
+                                    <div class="w-2/3 bg-gray-200 rounded-full h-6">
+                                        <div class="bg-[#EE9B00] h-6 rounded-full text-xs text-center text-black font-bold flex items-center justify-center" style="width: 30%">1-2 días</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-1/3 text-sm font-semibold pr-2 text-right">Pruebas</div>
+                                    <div class="w-2/3 bg-gray-200 rounded-full h-6">
+                                        <div class="bg-[#CA6702] h-6 rounded-full text-xs text-center text-white font-bold flex items-center justify-center" style="width: 40%">2 días</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="benefits">
+                 <div class="bg-[#005F73] text-white rounded-lg shadow-md p-6 md:p-8">
+                    <h2 class="text-3xl font-bold mb-6 text-center">Beneficios Clave de la Migración</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                        <div class="bg-[#0A9396] p-4 rounded-lg">
+                            <div class="text-4xl mb-2">🚀</div>
+                            <h3 class="font-semibold text-lg">Escalabilidad</h3>
+                            <p class="text-sm opacity-90">Cada servicio escala de forma independiente según su demanda específica.</p>
+                        </div>
+                        <div class="bg-[#0A9396] p-4 rounded-lg">
+                            <div class="text-4xl mb-2">🔧</div>
+                            <h3 class="font-semibold text-lg">Mantenimiento</h3>
+                            <p class="text-sm opacity-90">Equipos más pequeños pueden gestionar servicios específicos, simplificando las actualizaciones.</p>
+                        </div>
+                        <div class="bg-[#0A9396] p-4 rounded-lg">
+                            <div class="text-4xl mb-2">📦</div>
+                            <h3 class="font-semibold text-lg">Despliegue Autónomo</h3>
+                            <p class="text-sm opacity-90">Actualizar un servicio no requiere desplegar toda la aplicación.</p>
+                        </div>
+                        <div class="bg-[#0A9396] p-4 rounded-lg">
+                            <div class="text-4xl mb-2">💡</div>
+                            <h3 class="font-semibold text-lg">Flexibilidad Tecnológica</h3>
+                            <p class="text-sm opacity-90">Permite usar la mejor tecnología para cada tarea específica sin afectar a otros servicios.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Infografía generada para la planificación estratégica del proyecto.</p>
+        </footer>
+    </div>
+
+    <script>
+        const wrapLabel = (label, maxLength = 16) => {
+            if (label.length <= maxLength) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + word).length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            });
+            lines.push(currentLine.trim());
+            return lines;
+        };
+        
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+
+        const controllerData = {
+            labels: [
+                'NotificacionTipoController',
+                'NotificacionAutomaticaController',
+                'NotificacionTipoUsuarioController',
+                'NotificacionUsuarioController',
+                'NotificationPushController'
+            ].map(l => wrapLabel(l)),
+            datasets: [{
+                label: 'Nivel de Complejidad y Responsabilidades',
+                data: [3, 5, 6, 9, 7],
+                backgroundColor: ['#94D2BD', '#E9D8A6', '#EE9B00', '#CA6702', '#BB3E03'],
+                borderColor: '#FFFFFF',
+                borderWidth: 2
+            }]
+        };
+
+        new Chart(document.getElementById('controllerResponsibilitiesChart'), {
+            type: 'bar',
+            data: controllerData,
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Complejidad Relativa por Controlador',
+                        color: '#005F73',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    y: {
+                         grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        const timelineData = {
+            labels: ['Estimación Total del Proyecto (Semanas)'],
+            datasets: [
+                {
+                    label: 'Planificación y Diseño',
+                    data: [2],
+                    backgroundColor: '#0A9396',
+                },
+                {
+                    label: 'Migración de Módulos (Paralelo)',
+                    data: [6],
+                    backgroundColor: '#94D2BD',
+                },
+                {
+                    label: 'Integración y Pruebas',
+                    data: [3],
+                    backgroundColor: '#EE9B00',
+                }
+            ]
+        };
+
+        new Chart(document.getElementById('projectTimelineChart'), {
+            type: 'bar',
+            data: timelineData,
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                           title: (tooltipItems) => 'Fase del Proyecto'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Semanas'
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
